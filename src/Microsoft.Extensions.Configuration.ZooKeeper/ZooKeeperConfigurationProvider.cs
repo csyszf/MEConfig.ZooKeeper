@@ -11,7 +11,6 @@ namespace Microsoft.Extensions.Configuration
     {
         private readonly string _connectionString;
         private readonly string _path;
-        private Watcher watcher;
         private const int ZOOKEEPER_CONNECTION_TIMEOUT = 2000;
 
         public ZooKeeperConfigurationProvider(string connectionString, string path)
@@ -29,20 +28,28 @@ namespace Microsoft.Extensions.Configuration
         {
             await UsingZookeeper(_connectionString, async zk =>
             {
-                IEnumerable<(string key, string value)> allData = await GetData(zk, "");
+                IEnumerable<(string key, string value)> allData = await GetData(zk);
                 Data = allData.ToDictionary(kvp => kvp.key, kvp => kvp.value);
             });
         }
 
+        private async Task<IEnumerable<(string key, string value)>> GetData(ZooKeeper zk)
+        {
+            ChildrenResult childrenResult = await zk.getChildrenAsync(_path);
+            IEnumerable<Task<IEnumerable<(string key, string value)>>> getAllChildrenTask = childrenResult.Children
+                .Select(child => GetData(zk, _path + '/' + child));
+            IEnumerable<(string key, string value)>[] result = await Task.WhenAll(getAllChildrenTask);
+            return result.SelectMany(r => r);
+        }
+
         private async Task<IEnumerable<(string key, string value)>> GetData(ZooKeeper zk, string key)
         {
-            string aPath = _path + '/' + key;
             ChildrenResult childrenResult = await zk.getChildrenAsync(key);
             if (childrenResult.Children.Count == 0)
             {
                 DataResult dataResult = await zk.getDataAsync(key);
                 string value = Encoding.UTF8.GetString(dataResult.Data);
-                return new[] { (key.Replace('/', ':'), value) };
+                return new[] { (key.Replace(_path + "/", string.Empty).Replace('/', ':'), value) };
             }
             else
             {
