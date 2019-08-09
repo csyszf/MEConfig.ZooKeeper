@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.Configuration
             this IConfigurationBuilder configurationBuilder,
             string connectionString)
         {
-            return AddZooKeeper(configurationBuilder, new ZooKeeperConfigurationOptions(connectionString, string.Empty));
+            return AddZooKeeper(configurationBuilder, connectionString, "/");
         }
 
         /// <summary>
@@ -30,7 +30,24 @@ namespace Microsoft.Extensions.Configuration
             string connectionString,
             string configPath)
         {
-            return AddZooKeeper(configurationBuilder, new ZooKeeperConfigurationOptions(connectionString, configPath));
+            return AddZooKeeper(configurationBuilder, new ZooKeeperConfigurationOptions(connectionString, configPath, null, null));
+        }
+
+
+        /// <summary>
+        /// Adds an <see cref="IConfigurationProvider"/> that reads configuration values from the ZooKeeper.
+        /// </summary>
+        /// <param name="configurationBuilder">The <see cref="IConfigurationBuilder"/> to add to.</param>
+        /// <param name="connectionString">ZooKeeper connection string.</param>
+        /// <returns>The <see cref="IConfigurationBuilder"/>.</returns>
+        public static IConfigurationBuilder AddZooKeeper(
+            this IConfigurationBuilder configurationBuilder,
+            string connectionString,
+            string configPath,
+            string? schema,
+            string? auth)
+        {
+            return AddZooKeeper(configurationBuilder, new ZooKeeperConfigurationOptions(connectionString, configPath, schema, auth));
         }
 
         /// <summary>

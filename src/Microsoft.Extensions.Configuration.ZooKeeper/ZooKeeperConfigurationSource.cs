@@ -11,7 +11,7 @@
 
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new ZooKeeperConfigurationProvider(options.ConnectionString, options.Path);
+            return new ZooKeeperConfigurationProvider(options);
         }
     }
 }

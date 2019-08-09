@@ -4,13 +4,21 @@ namespace Microsoft.Extensions.Configuration
 {
     public class ZooKeeperConfigurationOptions
     {
-        public ZooKeeperConfigurationOptions(string connectionString, string path)
+        public ZooKeeperConfigurationOptions(
+            string connectionString, 
+            string path,
+            string? schema,
+            string? auth)
         {
-            ConnectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-            Path = path ?? throw new ArgumentNullException(nameof(path));
+            ConnectionString = connectionString;
+            Path = path;
+            Schema = schema;
+            Auth = auth;
         }
 
-        public string ConnectionString { get; set; } = default!;
-        public string Path { get; set; } = default!;
+        public string ConnectionString { get; }
+        public string Path { get; }
+        public string? Schema { get; }
+        public string? Auth { get; }
     }
 }

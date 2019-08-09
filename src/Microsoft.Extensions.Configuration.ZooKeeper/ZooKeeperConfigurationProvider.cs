@@ -9,14 +9,12 @@ namespace Microsoft.Extensions.Configuration
 {
     internal class ZooKeeperConfigurationProvider : ConfigurationProvider
     {
-        private readonly string _connectionString;
-        private readonly string _path;
+        private readonly ZooKeeperConfigurationOptions _options;
         private const int ZOOKEEPER_CONNECTION_TIMEOUT = 2000;
 
-        public ZooKeeperConfigurationProvider(string connectionString, string path)
+        public ZooKeeperConfigurationProvider(ZooKeeperConfigurationOptions options)
         {
-            this._connectionString = connectionString;
-            this._path = path;
+            this._options = options;
         }
 
         public override void Load()
@@ -26,8 +24,13 @@ namespace Microsoft.Extensions.Configuration
 
         private async Task LoadAsync()
         {
-            await UsingZookeeper(_connectionString, async zk =>
+            await UsingZookeeper(_options.ConnectionString, async zk =>
             {
+                if(_options.Schema != null)
+                {
+                    var auth = Encoding.UTF8.GetBytes(_options.Auth);
+                    zk.addAuthInfo(_options.Schema, auth);
+                }
                 IEnumerable<(string key, string value)> allData = await GetData(zk);
                 Data = allData.ToDictionary(kvp => kvp.key, kvp => kvp.value);
             });
@@ -35,9 +38,9 @@ namespace Microsoft.Extensions.Configuration
 
         private async Task<IEnumerable<(string key, string value)>> GetData(ZooKeeper zk)
         {
-            ChildrenResult childrenResult = await zk.getChildrenAsync(_path);
+            ChildrenResult childrenResult = await zk.getChildrenAsync(_options.Path);
             IEnumerable<Task<IEnumerable<(string key, string value)>>> getAllChildrenTask = childrenResult.Children
-                .Select(child => GetData(zk, _path + '/' + child));
+                .Select(child => GetData(zk, _options.Path + '/' + child));
             IEnumerable<(string key, string value)>[] result = await Task.WhenAll(getAllChildrenTask);
             return result.SelectMany(r => r);
         }
@@ -49,7 +52,7 @@ namespace Microsoft.Extensions.Configuration
             {
                 DataResult dataResult = await zk.getDataAsync(key);
                 string value = Encoding.UTF8.GetString(dataResult.Data);
-                return new[] { (key.Replace(_path + "/", string.Empty).Replace('/', ':'), value) };
+                return new[] { (key.Replace(_options.Path + "/", string.Empty).Replace('/', ':'), value) };
             }
             else
             {
@@ -58,11 +61,6 @@ namespace Microsoft.Extensions.Configuration
                 IEnumerable<(string key, string value)>[] result = await Task.WhenAll(getAllChildrenTask);
                 return result.SelectMany(r => r);
             }
-        }
-
-        private static Task<T> UsingZookeeper<T>(Func<ZooKeeper, Task<T>> zkMethod, string deploymentConnectionString, Watcher watcher, bool canBeReadOnly = false)
-        {
-            return ZooKeeper.Using(deploymentConnectionString, ZOOKEEPER_CONNECTION_TIMEOUT, null, zkMethod, canBeReadOnly);
         }
 
         private Task UsingZookeeper(string connectString, Func<ZooKeeper, Task> zkMethod)

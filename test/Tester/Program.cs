@@ -13,7 +13,7 @@ namespace Tester
         static void Run()
         {
             var builder = new ConfigurationBuilder();
-            builder.AddZooKeeper("10.211.55.2:2181", "/config");
+            builder.AddZooKeeper("10.211.55.2:2181", "/config", "digest", "test:test123");
 
             var config = builder.Build();
 
