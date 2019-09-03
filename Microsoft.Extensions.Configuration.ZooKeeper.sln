@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{85AF7063-DE3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{1933F11C-A288-40BE-94EC-AE02060D16AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Extensions.Configuration.ZooKeeper.Test", "test\Microsoft.Extensions.Configuration.ZooKeeper.Test\Microsoft.Extensions.Configuration.ZooKeeper.Test.csproj", "{6FA0D439-35A3-44CF-BD4C-9FB126B7B281}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.Configuration.ZooKeeper.Test", "test\Microsoft.Extensions.Configuration.ZooKeeper.Test\Microsoft.Extensions.Configuration.ZooKeeper.Test.csproj", "{6FA0D439-35A3-44CF-BD4C-9FB126B7B281}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "test\Tester\Tester.csproj", "{E97026F8-A705-4283-8141-746199EC1379}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tester", "test\Tester\Tester.csproj", "{E97026F8-A705-4283-8141-746199EC1379}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

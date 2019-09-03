@@ -1,4 +1,5 @@
-﻿using org.apache.zookeeper;
+﻿using Microsoft.Extensions.Logging;
+using org.apache.zookeeper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,15 @@ namespace Microsoft.Extensions.Configuration
     internal class ZooKeeperConfigurationProvider : ConfigurationProvider
     {
         private readonly ZooKeeperConfigurationOptions _options;
+        private readonly ZooKeeperWatcher _watcher;
         private const int ZOOKEEPER_CONNECTION_TIMEOUT = 2000;
 
-        public ZooKeeperConfigurationProvider(ZooKeeperConfigurationOptions options)
+        public ZooKeeperConfigurationProvider(
+            ZooKeeperConfigurationOptions options,
+            ILogger<ZooKeeperConfigurationProvider> logger)
         {
-            this._options = options;
+            _options = options;
+            _watcher = new ZooKeeperWatcher(logger);
         }
 
         public override void Load()
@@ -26,9 +31,9 @@ namespace Microsoft.Extensions.Configuration
         {
             await UsingZookeeper(_options.ConnectionString, async zk =>
             {
-                if(_options.Schema != null)
+                if (_options.Schema != null)
                 {
-                    var auth = Encoding.UTF8.GetBytes(_options.Auth);
+                    byte[] auth = Encoding.UTF8.GetBytes(_options.Auth);
                     zk.addAuthInfo(_options.Schema, auth);
                 }
                 IEnumerable<(string key, string value)> allData = await GetData(zk);
@@ -66,6 +71,24 @@ namespace Microsoft.Extensions.Configuration
         private Task UsingZookeeper(string connectString, Func<ZooKeeper, Task> zkMethod)
         {
             return ZooKeeper.Using(connectString, ZOOKEEPER_CONNECTION_TIMEOUT, null, zkMethod);
+        }
+    }
+
+    internal class ZooKeeperWatcher : Watcher
+    {
+        private readonly ILogger _logger;
+        public ZooKeeperWatcher(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        public override Task process(WatchedEvent @event)
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug(@event.ToString());
+            }
+            return Task.CompletedTask;
         }
     }
 }
