@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.Configuration
 
         private Task UsingZookeeper(string connectString, Func<ZooKeeper, Task> zkMethod)
         {
-            return ZooKeeper.Using(connectString, ZOOKEEPER_CONNECTION_TIMEOUT, null, zkMethod);
+            return ZooKeeper.Using(connectString, ZOOKEEPER_CONNECTION_TIMEOUT, _watcher, zkMethod);
         }
     }
 
