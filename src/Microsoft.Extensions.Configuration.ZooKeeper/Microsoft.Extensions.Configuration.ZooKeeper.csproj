@@ -5,6 +5,7 @@
     <PackageId>MEConfig.ZooKeeper</PackageId>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
+    <VersionPrefix>0.1.0</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
